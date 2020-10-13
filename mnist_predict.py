@@ -3,20 +3,29 @@ import mnist_forward
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+regularizer=0.0001
 def prepic(image):
     img = Image.open(image)
     reim=img.resize((28,28),Image.ANTIALIAS)
-    reim=np.array(reim.convert("L"))
-    plt.imshow(reim)
-    plt.show()
-    nm_arr=reim.reshape([1,784])
+    im_arr=np.array(reim.convert("L"))    
+    # threshold=50
+    # for i in range(28):
+    #     for j in range(28):
+    #         im_arr[i][j] = 255 - im_arr[i][j]
+    #         if (im_arr[i][j] < threshold):
+    #             im_arr[i][j] = 0
+    #         else: im_arr[i][j] = 255  
+    plt.imshow(im_arr)
+    #plt.show()  
+    nm_arr=im_arr.reshape([1,784])
     nm_arr=nm_arr.astype(np.float32)
     im_ready=np.multiply(nm_arr,1.0/255.0)
     return im_ready
 def predict(im_ready):
     with tf.Graph().as_default() as p:  
         x=tf.placeholder(tf.float32,[None,mnist_forward.INPUT_NODE])
-        y=mnist_forward.forward(x)
+        y=mnist_forward.forward(x,regularizer)
         predict_op=tf.arg_max(y,1)
         saver=tf.train.Saver()
         with tf.Session() as sess:
@@ -27,10 +36,24 @@ def predict(im_ready):
     return result
 
 #predict(image)
-for i in range(10):
-    print('input is %d '%(i),end="")
-    result=predict(prepic('./num/%d.png'%(i)))
-    if result[0]==i:
-        print("√")
-    else:
-        print("X")
+def eachFile(filepath):
+    pathDir=os.listdir(filepath)
+    for allDir in pathDir:
+        impath=os.path.join('%s%s'%(filepath,allDir))
+        answer=impath[-6:-5]
+        result=predict(prepic(impath))
+        #print('child',child[-5:-4])
+        if int(answer)==result:
+            print("√")
+        else:
+            print("X",'the correct answer is',answer)
+            plt.show()
+# while True:
+#     impath,answer=eachFile(./mnist_test_jpg_10000/)
+#     print('input is %d '%(i),end="")
+#     result=predict(prepic('./mnist_test_jpg_10000/%d.png'%(i)))
+#     if result[0]==i:
+#         print("√")
+#     else:
+#         print("X")
+eachFile('./num+/')
