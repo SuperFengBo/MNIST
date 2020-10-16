@@ -9,13 +9,13 @@ def prepic(image):
     img = Image.open(image)
     reim=img.resize((28,28),Image.ANTIALIAS)
     im_arr=np.array(reim.convert("L"))    
-    # threshold=50
-    # for i in range(28):
-    #     for j in range(28):
-    #         im_arr[i][j] = 255 - im_arr[i][j]
-    #         if (im_arr[i][j] < threshold):
-    #             im_arr[i][j] = 0
-    #         else: im_arr[i][j] = 255  
+    threshold=50
+    for i in range(28):
+        for j in range(28):
+            im_arr[i][j] = 255 - im_arr[i][j]
+            if (im_arr[i][j] < threshold):
+                im_arr[i][j] = 0
+            else: im_arr[i][j] = 255  
     plt.imshow(im_arr)
     #plt.show()  
     nm_arr=im_arr.reshape([1,lenet5_forward.IMAGE_SIZE,lenet5_forward.IMAGE_SIZE,lenet5_forward.IMAGE_CHANNEL])
@@ -25,7 +25,7 @@ def prepic(image):
 def predict(im_ready):
     with tf.Graph().as_default() as p:  
         x=tf.placeholder(tf.float32,[None,lenet5_forward.IMAGE_SIZE,lenet5_forward.IMAGE_SIZE,lenet5_forward.IMAGE_CHANNEL])
-        y=lenet5_forward.forward(x,regularizer)
+        y=lenet5_forward.forward(x,None,regularizer)
         predict_op=tf.arg_max(y,1)
         saver=tf.train.Saver()
         with tf.Session() as sess:
@@ -38,6 +38,7 @@ def predict(im_ready):
 #predict(image)
 def eachFile(filepath):
     pathDir=os.listdir(filepath)
+    correct_num=0
     for allDir in pathDir:
         impath=os.path.join('%s%s'%(filepath,allDir))
         answer=impath[-5:-4]
@@ -45,9 +46,11 @@ def eachFile(filepath):
         #print('child',child[-5:-4])
         if int(answer)==result:
             print("√")
+            correct_num = correct_num + 1
         else:
             print("X",'the correct answer is',answer)
             plt.show()
+        print('correct_num',correct_num)
 # while True:
 #     impath,answer=eachFile(./mnist_test_jpg_10000/)
 #     print('input is %d '%(i),end="")
@@ -56,4 +59,5 @@ def eachFile(filepath):
 #         print("√")
 #     else:
 #         print("X")
+eachFile('./pic/')
 eachFile('./mnist_test_jpg_10000/')
