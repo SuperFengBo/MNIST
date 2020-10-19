@@ -6,10 +6,12 @@ import platform
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+
+gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"]="true"
-STEPS=50000
-BATCH_SIZE=500
-LEARNING_RATE_BASE=0.01
+STEPS=1000000
+BATCH_SIZE=1000
+LEARNING_RATE_BASE=0.000005
 LEARNING_RATE_DECAY=0.9999
 MOVING_AVERAGE_DECAY=0.99
 logdir='./log/'
@@ -87,7 +89,7 @@ def backward(cifar_path):
     with tf.control_dependencies([train_step,ema_op]):
         train_op=tf.no_op(name='train')      
 
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options) ) as sess:
         sess.run(tf.global_variables_initializer()) 
         ckpt=tf.train.get_checkpoint_state(MODEL_DIR)
         if ckpt and ckpt.model_checkpoint_path:
@@ -96,8 +98,8 @@ def backward(cifar_path):
             for j in range(int(50000/BATCH_SIZE)):
                 ys_batch_val=sess.run(ys_batch)
                 xs,ys=xs_batch[BATCH_SIZE*j:BATCH_SIZE*(j+1)],ys_batch_val[BATCH_SIZE*j:BATCH_SIZE*(j+1)]                       
-                learning_rate_val,summary_,result,loss_val,step,ce_val=sess.run([learning_rate,summary_merged,train_op,loss,global_step,ce],feed_dict={x:xs,y_:ys})            
-                if step%50==0:
+                learning_rate_val,summary_,result,loss_val,step,ce_val=sess.run([learning_rate,summary_merged,train_op,loss,global_step,ce],feed_dict={x:xs,y_:ys})           
+                if step%(50000/BATCH_SIZE)==0:
                     print('After %d steps,loss is %f'%(step,loss_val))
                     saver.save(sess,MODEL_DIR,global_step=global_step)            
                     writer=tf.summary.FileWriter(logdir)

@@ -4,11 +4,12 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 regularizer=0.0001
 def prepic(image):
     img = Image.open(image)
     reim=img.resize((32,32),Image.ANTIALIAS)
-    im_arr=np.array(reim.convert("L"))    
+    #im_arr=np.array(reim.convert("L"))    
     # threshold=50
     # for i in range(32):
     #     for j in range(32):
@@ -16,9 +17,9 @@ def prepic(image):
     #         if (im_arr[i][j] < threshold):
     #             im_arr[i][j] = 0
     #         else: im_arr[i][j] = 255  
-    plt.imshow(im_arr)
+    plt.imshow(reim)
     #plt.show()  
-    nm_arr=im_arr.reshape([1,cifar_forward.IMAGE_SIZE,cifar_forward.IMAGE_SIZE,cifar_forward.IMAGE_CHANNEL])
+    nm_arr=np.reshape(reim,[1,cifar_forward.IMAGE_SIZE,cifar_forward.IMAGE_SIZE,cifar_forward.IMAGE_CHANNEL])
     nm_arr=nm_arr.astype(np.float32)
     im_ready=np.multiply(nm_arr,1.0/255.0)
     return im_ready
@@ -59,5 +60,5 @@ def eachFile(filepath):
 #         print("√")
 #     else:
 #         print("X")
-eachFile('./num_/')
+eachFile('./pic/')
 #eachFile('./mnist_test_jpg_10000/')
